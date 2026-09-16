@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>I'm So Sorry, Radhika</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          rosewater: '#fff1f2',
+          blush: '#ffe4e6',
+          petal: '#e11d48',
+          deeprose: '#be123c',
+          romance: '#881337',
+        },
+        fontFamily: {
+          sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          serif: ['"Playfair Display"', 'serif'],
+        }
+      }
+    }
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.372.0/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+<style>
+  :root{ color-scheme: light; }
+  html{ font-size: 17px; }
+  .glass-card{
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(254,205,211,.55);
+    box-shadow: 0 10px 30px -10px rgba(190,18,60,.08);
+  }
+  .glass-card-deep{
+    background: rgba(255,255,255,.95);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(253,164,175,.6);
+    box-shadow: 0 18px 40px -12px rgba(190,18,60,.12);
+  }
+  #hearts-canvas{ position:fixed; inset:0; width:100vw; height:100vh; pointer-events:none; z-index:1; }
+
+  .punch-particle{ position:absolute; pointer-events:none; animation: particleOut .75s ease-out forwards; }
+  @keyframes particleOut{
+    0%{ opacity:1; transform: translate(-50%,-50%) scale(.6); }
+    100%{ opacity:0; transform: translate(var(--tw-tx),var(--tw-ty)) scale(1.4); }
+  }
+
+  .type-cursor::after{
+    content:'|';
+    animation: blink 1s step-start infinite;
+    color: #be123c;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .day-card[data-open="true"] .day-body{ max-height: 400px; opacity:1; margin-top: .6rem; }
+  .day-body{ max-height:0; opacity:0; overflow:hidden; transition: max-height .4s ease, opacity .3s ease, margin-top .4s ease; }
+  .day-card[data-open="true"] .chev{ transform: rotate(180deg); }
+  .chev{ transition: transform .3s ease; }
+
+  .trust-fill{ transition: width .5s ease; }
+
+  .promise-card{ transition: border-color .25s ease, background-color .25s ease; }
+  .promise-card[data-checked="true"]{ border-color: #fb7185; background-color: rgba(255,228,230,.55); }
+  .check-ring{ transition: background-color .2s ease, border-color .2s ease; }
+  .promise-card[data-checked="true"] .check-ring{ background-color:#e11d48; border-color:#e11d48; }
+  .promise-card[data-checked="true"] .check-icon{ opacity:1; transform: scale(1); }
+  .check-icon{ opacity:0; transform: scale(.5); transition: all .2s ease; }
+
+  .call-pulse{ animation: callPulse 1.8s ease-in-out infinite; }
+  @keyframes callPulse{
+    0%,100%{ box-shadow: 0 0 0 0 rgba(225,29,72,.35); }
+    50%{ box-shadow: 0 0 0 18px rgba(225,29,72,0); }
+  }
+
+  .dream-card{ transition: transform .25s ease; }
+  .dream-card:hover{ transform: translateY(-3px); }
+
+  @media (prefers-reduced-motion: reduce){
+    .day-body, .chev, .trust-fill, .promise-card, .check-icon, .call-pulse, .dream-card { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body class="bg-gradient-to-b from-rosewater via-[#fff5f6] to-[#ffe4e6] text-slate-800 font-sans antialiased min-h-screen relative overflow-x-hidden">
+
+<canvas id="hearts-canvas"></canvas>
+
+<main class="relative z-10 max-w-xl lg:max-w-6xl mx-auto min-h-screen px-5 py-10 pb-40 flex flex-col gap-12 sm:my-8 sm:rounded-[2.5rem] sm:shadow-2xl sm:border sm:border-rose-200 lg:px-16 lg:py-20">
+
+  <!-- Header -->
+  <header class="text-center pt-2 space-y-4 lg:pt-6 lg:max-w-4xl lg:mx-auto">
+    <div class="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-white/90 border border-rose-300 text-deeprose text-sm font-semibold tracking-wide shadow-sm">
+      <span class="inline-block w-2.5 h-2.5 rounded-full bg-petal animate-ping"></span>
+      Likha hua hai, dil se hai
+    </div>
+
+    <div class="space-y-3">
+      <h1 class="font-serif text-4xl sm:text-5xl lg:text-7xl font-bold text-romance tracking-tight leading-tight">
+        Radhika, ek baar sun lo mujhe
+      </h1>
+      <p id="type-line" class="text-base lg:text-xl text-rose-700 font-medium type-cursor min-h-[2rem]"></p>
+    </div>
+
+    <div class="glass-card p-6 lg:p-8 rounded-2xl text-left border-l-4 border-l-petal space-y-3 lg:max-w-3xl lg:mx-auto">
+      <div class="flex items-center gap-2 text-deeprose font-bold text-sm lg:text-base tracking-wide">
+        <i data-lucide="message-square" class="w-5 h-5 shrink-0"></i>
+        <span>Yeh formality nahi hai, sirf sach hai</span>
+      </div>
+      <p class="text-sm lg:text-lg text-slate-700 leading-relaxed font-normal">
+        Radhika, mujhe pata hai tum mujhse bohot zyada naraaz ho, aur tumhara gussa poori tarah se sahi hai. Mai yahan koi shayari sunane nahi aaya — bas jo pichle 3 dino se seene me chubhan reh rahi hai, wahi tumse seedha keh dena chahta hu. Please neeche thoda sa scroll karo, mai wada karta hu tumhara waqt zaya nahi hoga.
+      </p>
+    </div>
+  </header>
+
+  <div class="lg:grid lg:grid-cols-5 lg:gap-10 lg:items-start space-y-12 lg:space-y-0">
+    <div class="lg:col-span-3 space-y-12">
+
+      <!-- The Letter -->
+      <section class="glass-card-deep p-7 lg:p-10 rounded-3xl space-y-5 relative">
+        <div class="flex items-center gap-2 text-deeprose text-sm lg:text-base font-bold tracking-wide">
+          <i data-lucide="heart-handshake" class="w-5 h-5 shrink-0"></i>
+          <span>Meri galti, aur teen din ka sannata</span>
+        </div>
+
+        <h2 class="font-serif text-2xl lg:text-3xl font-bold text-romance">
+          Tumhe hurt karke, khud ko bhi tod diya maine
+        </h2>
+
+        <div class="space-y-4 text-sm lg:text-lg text-slate-700 leading-relaxed">
+          <p>
+            Jab se tumne mujhe block kiya hai, har din aisa laga jaise ghar me koi awaaz hi na ho. Phone uthata hu, screen kholta hu, aur jahan tumhara naam dikhna chahiye wahan khaali jagah dikhti hai. Yeh khaali jagah kitni bhaari ho sakti hai, yeh mujhe ab jaake pata chala.
+          </p>
+          <p>
+            Meri laparwahi thi, meri baaton me wo dhyaan nahi tha jo hona chahiye tha, aur usi ki wajah se tumhari aankhon me aasu aaye. Jab tum hurt hoti ho na, gussa aana bilkul haq hai tumhara — mai yeh chupana nahi chahta, na hi kam karke dikhana chahta hu.
+          </p>
+          <p>
+            Koi safai nahi deni mujhe, na koi bahaana. Mujhe tumhari baat ko pehle sunna chahiye tha, tumhe priority deni chahiye thi. In teen dino ki doori ne itna sikha diya hai ki tumhare bina meri zindagi ka bohot kuch adhoora reh jaata hai. Bohot sharminda hu, aur sach me bohot zyada sorry hu.
+          </p>
+        </div>
+      </section>
+
+      <!-- Beach jhagde / need to meet -->
+      <section class="glass-card-deep p-7 lg:p-10 rounded-3xl space-y-5 border-l-4 border-l-deeprose">
+        <div class="flex items-center gap-2 text-deeprose text-sm lg:text-base font-bold tracking-wide">
+          <i data-lucide="waves" class="w-5 h-5 shrink-0"></i>
+          <span>Jo baat sirf milke karni hai</span>
+        </div>
+
+        <h2 class="font-serif text-2xl lg:text-3xl font-bold text-romance">
+          1 mahine se yehi keh raha hu — ek baar mil lo
+        </h2>
+
+        <div class="space-y-4 text-sm lg:text-lg text-slate-700 leading-relaxed">
+          <p>
+            Radhika, hamare beech jitne jhagde ho rahe hain, usi wajah se maine kaha tha ki mujhe tumse kuch baatein karni hain, milke. Ek mahine se zyada ho gaya hai, par abhi tak kuch nahi hua. Yeh sab likhna isliye pad raha hai kyunki jo baat mujhe seedha, tumhari aankhon me dekh ke kehni thi, wo abhi tak reh gayi hai.
+          </p>
+          <p>
+            Bohot kuch hai yaar jo mujhe tumhe batana hai, aur usme tumhara suggestion bhi chahiye — akele decide nahi karna chahta mai kuch bhi. Mai aise nahi reh sakta Radhika. Tumhe itna nahi rula sakta jitna hamare beech abhi ho raha hai.
+          </p>
+          <p>
+            Pata hai tumhe lagta hoga "ab aur kya baat karega" — par kuch hai jo sirf milke, saamne baithke discuss karna hai. Ek mahine se bol raha hu yeh, aaj bhi wahi keh raha hu.
+          </p>
+        </div>
+
+        <div class="bg-rose-50 border border-rose-200 rounded-2xl p-5 space-y-2">
+          <p class="text-xs lg:text-sm font-bold text-deeprose tracking-wide">Kya kya baat karni hai tumse</p>
+          <ul class="space-y-2 text-sm lg:text-base text-slate-700">
+            <li class="flex items-start gap-2"><i data-lucide="dot" class="w-5 h-5 text-petal shrink-0 mt-0.5"></i><span>Yeh jhagde baar baar kyun ho rahe hain, iski asli wajah dhoondni hai — dono taraf se, bina blame ke.</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="dot" class="w-5 h-5 text-petal shrink-0 mt-0.5"></i><span>Aage kaise chalna hai, iske liye tumhara suggestion chahiye — mai akela decide nahi karunga.</span></li>
+            <li class="flex items-start gap-2"><i data-lucide="dot" class="w-5 h-5 text-petal shrink-0 mt-0.5"></i><span>Jo dil me hai, wo saamne bolna hai — likh ke ya message karke adhoora lagta hai.</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Three day diary -->
+      <section class="space-y-4">
+        <div class="text-center lg:text-left space-y-1">
+          <h2 class="font-serif text-2xl lg:text-3xl font-bold text-romance">Yeh teen din kaise the, tumhe bata du?</h2>
+          <p class="text-sm lg:text-base text-slate-500">Har din pe tap karo, khulke padho</p>
+        </div>
+
+        <div class="space-y-3">
+          <div class="day-card glass-card rounded-2xl p-5 cursor-pointer" data-open="false">
+            <button type="button" class="day-toggle w-full flex items-center justify-between text-left">
+              <span class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-xl bg-rose-100 text-deeprose flex items-center justify-center text-sm font-bold shrink-0">1</span>
+                <span class="font-bold text-romance text-sm lg:text-lg">Pehla din — sannata samajh nahi paya</span>
+              </span>
+              <i data-lucide="chevron-down" class="chev w-5 h-5 text-deeprose shrink-0"></i>
+            </button>
+            <div class="day-body text-sm lg:text-base text-slate-600 leading-relaxed pl-12">
+              Pehle din laga shaayad tum thoda time le rahi ho, thodi der me theek ho jaayega. Baar baar phone check karta raha, message likh ke delete karta raha — kabhi laga sahi shabd nahi mil rahe, kabhi laga tumhe abhi space chahiye.
+            </div>
+          </div>
+
+          <div class="day-card glass-card rounded-2xl p-5 cursor-pointer" data-open="false">
+            <button type="button" class="day-toggle w-full flex items-center justify-between text-left">
+              <span class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-xl bg-rose-100 text-deeprose flex items-center justify-center text-sm font-bold shrink-0">2</span>
+                <span class="font-bold text-romance text-sm lg:text-lg">Dusra din — galti pura saaf dikhi</span>
+              </span>
+              <i data-lucide="chevron-down" class="chev w-5 h-5 text-deeprose shrink-0"></i>
+            </button>
+            <div class="day-body text-sm lg:text-base text-slate-600 leading-relaxed pl-12">
+              Dusre din maine wo pura din ghuma ke socha — kahan galat bola, kahan tumhari baat maanni chahiye thi. Us din samajh aaya ki maafi maangne se pehle, apni galti ko poori tarah maan lena zaroori hai. Woh maine kar liya.
+            </div>
+          </div>
+
+          <div class="day-card glass-card rounded-2xl p-5 cursor-pointer" data-open="false">
+            <button type="button" class="day-toggle w-full flex items-center justify-between text-left">
+              <span class="flex items-center gap-3">
+                <span class="w-9 h-9 rounded-xl bg-rose-100 text-deeprose flex items-center justify-center text-sm font-bold shrink-0">3</span>
+                <span class="font-bold text-romance text-sm lg:text-lg">Teesra din — bas tumse baat karni thi</span>
+              </span>
+              <i data-lucide="chevron-down" class="chev w-5 h-5 text-deeprose shrink-0"></i>
+            </button>
+            <div class="day-body text-sm lg:text-base text-slate-600 leading-relaxed pl-12">
+              Teesre din bas ek hi khayal tha — tumse seedha, saaf dil se baat karni hai, bina koi bahaana banaye. Isliye yeh page banaya, taaki tum apne time pe, apni jagah pe, meri poori baat sun sako.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Dreams / downfalls -->
+      <section class="glass-card-deep p-7 lg:p-10 rounded-3xl space-y-5">
+        <div class="flex items-center gap-2 text-deeprose text-sm lg:text-base font-bold tracking-wide">
+          <i data-lucide="sparkles" class="w-5 h-5 shrink-0"></i>
+          <span>Meri poori zindagi ka sach</span>
+        </div>
+        <h2 class="font-serif text-2xl lg:text-3xl font-bold text-romance">Har sapne mein, har girne mein — tum ho</h2>
+        <p class="text-sm lg:text-lg text-slate-700 leading-relaxed">
+          Puri life ke baare mein socha hai maine, aur uss soch mein, mere har ek sapne mein tum ho. Mera har growth, har achievement — usme tum ho. Aur mera har downfall, har bura waqt jahan mai gira — usme bhi sambhalne wali tum hi ho. Bas itna sa sach hai — mai iske bina reh nahi sakta, Radhika.
+        </p>
+
+        <div class="grid sm:grid-cols-2 gap-4 pt-1">
+          <div class="dream-card bg-rose-50 border border-rose-200 rounded-2xl p-5 space-y-1.5">
+            <div class="text-2xl">🌱</div>
+            <h3 class="font-bold text-romance text-sm lg:text-base">Har achievement mein</h3>
+            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">Jo bhi banna chahta hu, jahan bhi pahunchna chahta hu — us tasveer mein tum hamesha khadi ho.</p>
+          </div>
+          <div class="dream-card bg-rose-50 border border-rose-200 rounded-2xl p-5 space-y-1.5">
+            <div class="text-2xl">🌧️</div>
+            <h3 class="font-bold text-romance text-sm lg:text-base">Har mushkil waqt mein</h3>
+            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">Jab bhi sab kuch gira, jo haath thaame rakhta tha wo tumhara hi tha. Yeh bhoolna namumkin hai.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="lg:col-span-2 space-y-12">
+
+      <!-- Call me section -->
+      <section class="glass-card-deep p-7 lg:p-9 rounded-3xl text-center space-y-4 border border-rose-300">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-deeprose text-xs lg:text-sm font-bold tracking-wide">
+          <i data-lucide="phone-call" class="w-4 h-4"></i>
+          <span>Sirf ek call door hu</span>
+        </div>
+        <h3 class="font-serif text-xl lg:text-2xl font-bold text-romance leading-snug">
+          Please Radhika, ek baar call kar lo
+        </h3>
+        <p class="text-sm lg:text-base text-slate-600 leading-relaxed">
+          Type karke poori baat nahi ho paayegi. Ek baar sirf awaaz sun lo meri, ya phone utha ke jo bolna hai bol do. Mai wahi sunne, aur sunane, ke intezaar mein hu.
+        </p>
+        <a href="tel:9554022084" class="call-pulse block w-full py-4 bg-gradient-to-r from-rose-600 to-deeprose text-white text-sm lg:text-base font-bold rounded-2xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-transform">
+          <i data-lucide="phone" class="w-5 h-5 fill-white"></i>
+          <span>Call Me</span>
+        </a>
+        <p class="text-xs text-slate-400">Ya WhatsApp pe unblock karke bhi bata sakti ho</p>
+      </section>
+
+      <!-- Promises with trust meter -->
+      <section class="space-y-4">
+        <div class="text-center space-y-1">
+          <h2 class="font-serif text-2xl lg:text-3xl font-bold text-romance">Mere pakke wade tumse</h2>
+          <p class="text-sm lg:text-base text-slate-500">Sirf bolne ke liye nahi — tap karo agar yakeen aa raha hai</p>
+        </div>
+
+        <div class="glass-card p-4 rounded-2xl space-y-2">
+          <div class="flex items-center justify-between text-sm font-semibold text-deeprose">
+            <span>Bharosa meter</span>
+            <span id="trust-percent">0%</span>
+          </div>
+          <div class="w-full h-3 rounded-full bg-rose-100 overflow-hidden">
+            <div id="trust-bar" class="trust-fill h-full bg-gradient-to-r from-rose-400 to-petal" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="space-y-3.5" id="promise-list">
+          <div class="promise-card glass-card p-5 rounded-2xl border-rose-100 flex items-start gap-4 cursor-pointer" data-checked="false">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-xl shrink-0 text-deeprose">🍔</div>
+            <div class="space-y-1 flex-1">
+              <h3 class="font-bold text-romance text-sm lg:text-base">Khane peene par koi toka-taki nahi</h3>
+              <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
+                Tumhe street food pasand hai to khaogi, mai kabhi bematlab nahi tokunga. Chaat, momos, golgappe — jo mann kare, mai khud tumhare favorite stall se le aaunga.
+              </p>
+            </div>
+            <div class="check-ring w-7 h-7 rounded-full border-2 border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="check" class="check-icon w-4 h-4 text-white"></i>
+            </div>
+          </div>
+
+          <div class="promise-card glass-card p-5 rounded-2xl border-rose-100 flex items-start gap-4 cursor-pointer" data-checked="false">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-xl shrink-0 text-deeprose">📚</div>
+            <div class="space-y-1 flex-1">
+              <h3 class="font-bold text-romance text-sm lg:text-base">Padhai aur career par zero pressure</h3>
+              <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
+                Jo padhna hai, jis field me aage badhna hai, jis pace pe chalna hai — sab tumhari marzi. Mai force nahi karunga, bas bina judge kiye saath khada rahunga.
+              </p>
+            </div>
+            <div class="check-ring w-7 h-7 rounded-full border-2 border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="check" class="check-icon w-4 h-4 text-white"></i>
+            </div>
+          </div>
+
+          <div class="promise-card glass-card p-5 rounded-2xl border-rose-100 flex items-start gap-4 cursor-pointer" data-checked="false">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-xl shrink-0 text-deeprose">⏱️</div>
+            <div class="space-y-1 flex-1">
+              <h3 class="font-bold text-romance text-sm lg:text-base">Tumhara waqt, meri sabse badi priority</h3>
+              <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
+                Kaam kitna bhi zaroori ho, tumhara call hamesha uthega. Bina bataye phone nahi kaatunga. Jab bhi zaroorat hogi, sab chhod ke pehle tumhare paas aunga.
+              </p>
+            </div>
+            <div class="check-ring w-7 h-7 rounded-full border-2 border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="check" class="check-icon w-4 h-4 text-white"></i>
+            </div>
+          </div>
+
+          <div class="promise-card glass-card p-5 rounded-2xl border-rose-100 flex items-start gap-4 cursor-pointer" data-checked="false">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-xl shrink-0 text-deeprose">🤝</div>
+            <div class="space-y-1 flex-1">
+              <h3 class="font-bold text-romance text-sm lg:text-base">Zero ego, sirf tumhari khushi</h3>
+              <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
+                Meri kisi aadat se tumhari aankhon me aasu aaye, to us aadat ko badalna mera farz hai. Waisa banunga jiske saath tum hamesha safe aur shaant feel karo.
+              </p>
+            </div>
+            <div class="check-ring w-7 h-7 rounded-full border-2 border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="check" class="check-icon w-4 h-4 text-white"></i>
+            </div>
+          </div>
+
+          <div class="promise-card glass-card p-5 rounded-2xl border-rose-100 flex items-start gap-4 cursor-pointer" data-checked="false">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-xl shrink-0 text-deeprose">🗣️</div>
+            <div class="space-y-1 flex-1">
+              <h3 class="font-bold text-romance text-sm lg:text-base">Jhagda hoga to bhaagunga nahi</h3>
+              <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
+                Ab se koi baat andar nahi rakhunga jisse baad mein bada jhagda bane. Chhoti se chhoti cheez bhi waqt par, shaanti se tumse discuss karunga.
+              </p>
+            </div>
+            <div class="check-ring w-7 h-7 rounded-full border-2 border-rose-200 flex items-center justify-center shrink-0 mt-0.5">
+              <i data-lucide="check" class="check-icon w-4 h-4 text-white"></i>
+            </div>
+          </div>
+        </div>
+
+        <p id="trust-note" class="text-sm text-emerald-700 font-medium text-center h-5"></p>
+      </section>
+
+      <!-- Punch box -->
+      <section class="glass-card-deep p-6 lg:p-7 rounded-3xl text-center space-y-4 border-rose-200">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-deeprose text-xs lg:text-sm font-bold tracking-wide">
+          <i data-lucide="shield-alert" class="w-4 h-4"></i>
+          <span>Gussa yahin nikaal lo</span>
+        </div>
+
+        <div class="space-y-1">
+          <h3 class="font-serif text-xl lg:text-2xl font-bold text-romance">Aadha gussa is chehre par nikaal do</h3>
+          <p class="text-sm lg:text-base text-slate-600 leading-relaxed px-1">
+            Pata hai tum mujhpar bohot chidhi hui ho. Chalo, thoda gussa yahin tap karke nikaal lo — baaki jab miloge, jitna maarna ho maar lena, mai ek lafz nahi bolunga.
+          </p>
+        </div>
+
+        <div class="relative w-36 h-36 lg:w-40 lg:h-40 mx-auto my-1 cursor-pointer select-none" id="punch-target">
+          <div class="w-full h-full rounded-full border-4 border-petal p-1 bg-gradient-to-br from-rose-100 to-rose-200 shadow-lg flex items-center justify-center overflow-hidden transition-transform duration-100 active:scale-90" id="avatar-frame">
+            <span class="text-6xl">😔</span>
+          </div>
+          <div class="absolute -bottom-2 bg-romance text-white text-xs font-semibold px-3 py-1 rounded-full left-1/2 -translate-x-1/2 shadow whitespace-nowrap">
+            Yahan tap karo
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <p class="text-sm font-semibold text-deeprose">
+            Gussa nikala: <span id="hit-count" class="text-lg font-bold text-petal">0</span> baar
+          </p>
+          <p class="text-sm text-emerald-700 font-medium h-5 transition-opacity duration-300" id="hit-calm-note"></p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- One last meeting plea -->
+  <section class="glass-card-deep p-8 lg:p-12 rounded-3xl text-center space-y-5 border border-rose-300 lg:max-w-4xl lg:mx-auto w-full">
+    <div class="text-4xl">🥺</div>
+    <h2 class="font-serif text-2xl lg:text-4xl font-bold text-romance leading-snug">
+      Bas ek baar milo, Radhika
+    </h2>
+    <p class="text-sm lg:text-lg text-slate-700 leading-relaxed lg:max-w-2xl lg:mx-auto">
+      Agar milne ke baad bhi tumhe lage ki khatam karna hi sahi hai, to jo tum kahogi wahi hoga — mai zid nahi karunga. Par itni pura kuch jeene ke baad, aise, bina milte, bina baat kiye khatam nahi kar sakte hum. Sirf ek aakhri mauka, saamne baithke.
+    </p>
+    <p class="text-sm lg:text-lg text-slate-700 leading-relaxed font-medium lg:max-w-2xl lg:mx-auto">
+      I can't live without you, Radhika. Please, ek baar baat kar lo mujhse.
+    </p>
+  </section>
+
+  <!-- Decision -->
+  <section class="glass-card-deep p-7 lg:p-10 rounded-3xl text-center space-y-5 relative lg:max-w-3xl lg:mx-auto w-full" id="decision-section">
+    <div class="space-y-2">
+      <div class="text-4xl">🥺</div>
+      <h2 class="font-serif text-2xl lg:text-3xl font-bold text-romance leading-snug">
+        Radhika, itna sab sach likhne ke baad ek sawaal...
+      </h2>
+      <p class="text-sm lg:text-lg font-medium text-slate-700">
+        Kya apne <span class="text-petal font-semibold">Hitesh</span> ko maaf kiya?
+      </p>
+    </div>
+
+    <div class="relative w-full h-40 lg:h-44 flex items-center justify-center overflow-hidden rounded-2xl bg-rose-50/60 p-2 border border-rose-200" id="runaway-container">
+      <button id="yes-btn" class="z-10 px-7 py-3.5 bg-gradient-to-r from-rose-600 to-deeprose text-white text-sm lg:text-base font-bold rounded-xl shadow-md active:scale-95 transition-transform flex items-center gap-2">
+        <span>Haan, maaf kar diya</span>
+        <i data-lucide="heart" class="w-5 h-5 fill-white"></i>
+      </button>
+
+      <button id="no-btn" class="absolute px-4 py-2.5 bg-white border border-rose-300 text-slate-600 text-sm font-semibold rounded-xl shadow-sm select-none whitespace-nowrap transition-all duration-150">
+        Nahi, abhi gussa hu 😤
+      </button>
+    </div>
+
+    <p id="runaway-toast" class="text-sm font-medium text-deeprose h-5"></p>
+  </section>
+
+  <!-- Celebration -->
+  <section id="celebration-section" class="hidden glass-card-deep p-7 lg:p-10 rounded-3xl text-center space-y-5 border border-petal lg:max-w-3xl lg:mx-auto w-full">
+    <div class="w-16 h-16 bg-rose-100 rounded-full mx-auto flex items-center justify-center text-3xl shadow-inner">🤍</div>
+    <div class="space-y-2">
+      <h3 class="font-serif text-2xl lg:text-3xl font-bold text-romance">Shukriya, Radhika</h3>
+      <p class="text-sm lg:text-lg text-slate-700 leading-relaxed font-normal">
+        In teen dino ne sikha diya ki tumhare bina mai adhoora hu. Ab neeche se ek time aur date chun lo, jab hum mil sakein.
+      </p>
+    </div>
+    <button id="reveal-date-btn" class="w-full py-3.5 bg-gradient-to-r from-petal to-rose-700 text-white font-bold text-sm lg:text-base rounded-xl shadow flex items-center justify-center gap-2 active:scale-98">
+      <span>Hamari date chuno</span>
+      <i data-lucide="arrow-down" class="w-5 h-5"></i>
+    </button>
+  </section>
+
+  <!-- Date picker -->
+  <section id="date-picker-section" class="hidden glass-card-deep p-7 lg:p-10 rounded-3xl space-y-6 lg:max-w-3xl lg:mx-auto w-full">
+    <div class="text-center space-y-1">
+      <h3 class="font-serif text-xl lg:text-2xl font-bold text-romance">Tumhe kab milna hai?</h3>
+      <p class="text-sm lg:text-base text-slate-500">Jo bhi date aur time suit kare, chun lo</p>
+    </div>
+
+    <div class="bg-white/90 rounded-2xl p-5 border border-rose-200 shadow-sm space-y-3">
+      <div class="flex items-center justify-between font-serif font-bold text-sm lg:text-base text-romance px-1">
+        <span id="calendar-month-name">This Month</span>
+        <span class="text-xs text-rose-400 font-normal">Date par tap karo</span>
+      </div>
+      <div class="grid grid-cols-7 gap-1 text-center text-sm font-semibold text-slate-400 py-1">
+        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+      </div>
+      <div class="grid grid-cols-7 gap-1 text-center text-sm font-medium" id="calendar-days-grid"></div>
+    </div>
+
+    <div class="space-y-2">
+      <label class="block text-sm font-bold text-slate-600">Perfect time slot chuno</label>
+      <div class="grid grid-cols-1 gap-2 text-sm" id="time-slot-container">
+        <button type="button" class="time-slot-btn w-full p-3.5 rounded-xl border border-rose-200 bg-white text-left font-medium text-slate-700 flex items-center justify-between active:scale-[0.99]" data-time="5:00 PM (Sunset Walk & Coffee)">
+          <span>🌅 5:00 PM — Sunset walk aur coffee</span>
+          <i data-lucide="check" class="w-4 h-4 text-petal opacity-0"></i>
+        </button>
+        <button type="button" class="time-slot-btn w-full p-3.5 rounded-xl border border-rose-200 bg-white text-left font-medium text-slate-700 flex items-center justify-between active:scale-[0.99]" data-time="7:30 PM (Street Food Feast & Chaat)">
+          <span>🌮 7:30 PM — Street food aur chaat</span>
+          <i data-lucide="check" class="w-4 h-4 text-petal opacity-0"></i>
+        </button>
+        <button type="button" class="time-slot-btn w-full p-3.5 rounded-xl border border-rose-200 bg-white text-left font-medium text-slate-700 flex items-center justify-between active:scale-[0.99]" data-time="9:00 PM (Long Drive & Ice Cream)">
+          <span>🍦 9:00 PM — Long drive aur ice cream</span>
+          <i data-lucide="check" class="w-4 h-4 text-petal opacity-0"></i>
+        </button>
+      </div>
+
+      <div class="pt-2">
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-slate-500 whitespace-nowrap">Ya apni marzi ka time:</span>
+          <input type="time" id="custom-time-input" class="w-full text-sm p-2.5 rounded-xl border border-rose-200 bg-white font-medium text-slate-700 focus:outline-none focus:border-petal">
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 rounded-xl bg-rose-50 border border-rose-300 text-center space-y-1">
+      <p class="text-xs font-semibold text-rose-600 tracking-wide">Selected plan</p>
+      <p class="text-sm lg:text-base font-bold text-romance" id="date-summary-text">Date: upar se chuno please ❤️</p>
+    </div>
+
+    <button id="confirm-date-btn" class="w-full py-4 bg-gradient-to-r from-deeprose to-romance text-white text-sm lg:text-base font-bold rounded-xl shadow-md active:scale-95 flex items-center justify-center gap-2">
+      <span>Date confirm karo, apna hug lo 🤗</span>
+    </button>
+  </section>
+
+  <!-- Final -->
+  <section id="final-hug-section" class="hidden glass-card-deep p-7 lg:p-10 rounded-3xl text-center space-y-6 border border-rose-300 lg:max-w-3xl lg:mx-auto w-full">
+    <div class="w-16 h-16 bg-rose-100 rounded-full mx-auto flex items-center justify-center text-3xl shadow-inner">🫂</div>
+    <div class="space-y-2">
+      <h3 class="font-serif text-2xl lg:text-3xl font-bold text-romance">Ab aur intezaar nahi hota, Radhika</h3>
+      <p class="text-sm lg:text-lg text-slate-700 leading-relaxed">
+        Pichle teen dino me har ghante tumhari kami mehsus hui. Bas ek baar milkar gale lagna hai. Neeche button dabao aur mujhe WhatsApp pe unblock karke bata do — ya seedha call kar do.
+      </p>
+    </div>
+    <div class="space-y-3">
+      <a id="whatsapp-trigger-btn" href="#" target="_blank" class="block w-full py-4 bg-gradient-to-r from-emerald-600 to-green-600 text-white font-bold text-sm lg:text-base rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-98">
+        <i data-lucide="message-circle" class="w-5 h-5 fill-white"></i>
+        <span>Click here to get a tight hug 🫂❤️</span>
+      </a>
+      <a href="tel:9554022084" class="block w-full py-4 bg-gradient-to-r from-rose-600 to-deeprose text-white font-bold text-sm lg:text-base rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-98">
+        <i data-lucide="phone" class="w-5 h-5 fill-white"></i>
+        <span>Bhadas nikalne ke liye yahan call karo</span>
+      </a>
+    </div>
+    <p class="text-xs text-slate-400">Hitesh wait kar raha hai...</p>
+  </section>
+
+</main>
+
+<script>
+  try { lucide.createIcons(); } catch (err) { console.error('icon render failed', err); }
+
+  /* 1. Ambient hearts */
+  const canvas = document.getElementById('hearts-canvas');
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
+
+  const hearts = [];
+  const heartColors = ['#f43f5e', '#fda4af', '#fb7185', '#ffe4e6'];
+  function createHeart(){
+    return { x: Math.random()*width, y: height + Math.random()*40, size: Math.random()*10+6,
+      speedY: Math.random()*1.0+0.5, speedX: (Math.random()-0.5)*0.5,
+      color: heartColors[Math.floor(Math.random()*heartColors.length)], opacity: Math.random()*0.5+0.2 };
+  }
+  for (let i=0;i<15;i++) hearts.push(createHeart());
+  function drawHeart(x,y,size,color,opacity){
+    ctx.save(); ctx.globalAlpha = opacity; ctx.fillStyle = color; ctx.beginPath();
+    const t = size*0.3;
+    ctx.moveTo(x, y+t);
+    ctx.bezierCurveTo(x,y, x-size/2,y, x-size/2,y+t);
+    ctx.bezierCurveTo(x-size/2, y+(size+t)/2, x, y+(size+t)/2, x, y+size);
+    ctx.bezierCurveTo(x, y+(size+t)/2, x+size/2, y+(size+t)/2, x+size/2, y+t);
+    ctx.bezierCurveTo(x+size/2, y, x, y, x, y+t);
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function animateHearts(){
+    ctx.clearRect(0,0,width,height);
+    hearts.forEach((h,i)=>{ h.y -= h.speedY; h.x += h.speedX; drawHeart(h.x,h.y,h.size,h.color,h.opacity);
+      if (h.y < -20) hearts[i] = createHeart(); });
+    requestAnimationFrame(animateHearts);
+  }
+  animateHearts();
+
+  /* 2. Typing effect on hero line */
+  const typeLine = document.getElementById('type-line');
+  const fullText = "I'm so sorry, Radhika... please ek mauka aur do mujhe.";
+  let ti = 0;
+  function typeStep(){
+    if (ti <= fullText.length){
+      typeLine.textContent = fullText.slice(0, ti);
+      ti++;
+      setTimeout(typeStep, 38);
+    } else {
+      typeLine.classList.remove('type-cursor');
+    }
+  }
+  typeStep();
+
+  /* 3. Day diary accordion */
+  document.querySelectorAll('.day-card').forEach(card=>{
+    card.querySelector('.day-toggle').addEventListener('click', ()=>{
+      const isOpen = card.getAttribute('data-open') === 'true';
+      card.setAttribute('data-open', isOpen ? 'false' : 'true');
+    });
+  });
+
+  /* 4. Trust meter / promise checklist */
+  const promiseCards = document.querySelectorAll('.promise-card');
+  const trustBar = document.getElementById('trust-bar');
+  const trustPercent = document.getElementById('trust-percent');
+  const trustNote = document.getElementById('trust-note');
+  const trustNotes = {
+    20: "Ek wada tumtak pahuncha... 🙏",
+    40: "Thoda bharosa wapas aa raha hai shayad?",
+    60: "Aadhe se zyada ho gaya...",
+    80: "Bas ek aur, please...",
+    100: "Poora bharosa — ab mai isse nibhaunga, hamesha. ❤️"
+  };
+  function updateTrust(){
+    const total = promiseCards.length;
+    const checked = document.querySelectorAll('.promise-card[data-checked="true"]').length;
+    const pct = Math.round((checked/total)*100);
+    trustBar.style.width = pct + '%';
+    trustPercent.textContent = pct + '%';
+    trustNote.textContent = trustNotes[pct] || '';
+  }
+  promiseCards.forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const isChecked = card.getAttribute('data-checked') === 'true';
+      card.setAttribute('data-checked', isChecked ? 'false' : 'true');
+      updateTrust();
+    });
+  });
+
+  /* 5. Punch interaction */
+  const punchTarget = document.getElementById('punch-target');
+  const avatarFrame = document.getElementById('avatar-frame');
+  const hitCountDisplay = document.getElementById('hit-count');
+  const hitCalmNote = document.getElementById('hit-calm-note');
+  let hits = 0;
+  const punchEmojis = ['💥','🥊','🤕','💔','💫'];
+  punchTarget.addEventListener('click', (e)=>{
+    hits++; hitCountDisplay.innerText = hits;
+    avatarFrame.classList.remove('scale-90'); void avatarFrame.offsetWidth; avatarFrame.classList.add('scale-90');
+    setTimeout(()=>avatarFrame.classList.remove('scale-90'), 100);
+    const rect = punchTarget.getBoundingClientRect();
+    const p = document.createElement('span');
+    p.className = 'punch-particle text-2xl font-bold';
+    p.innerText = punchEmojis[Math.floor(Math.random()*punchEmojis.length)];
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    p.style.left = x+'px'; p.style.top = y+'px';
+    p.style.setProperty('--tw-tx', ((Math.random()-0.5)*100)+'px');
+    p.style.setProperty('--tw-ty', (-(Math.random()*60+20))+'px');
+    punchTarget.appendChild(p);
+    setTimeout(()=>p.remove(), 750);
+    if (hits >= 4) hitCalmNote.innerText = "Thoda gussa shaant hua? Ab aage badho please... ❤️";
+  });
+
+  /* 6. Runaway No button */
+  const runawayContainer = document.getElementById('runaway-container');
+  const noBtn = document.getElementById('no-btn');
+  const runawayToast = document.getElementById('runaway-toast');
+  const evasions = ["Arey pakad nahi paogi!","Sirf haan bolna allow hai please!","Maan jao na Radhika please...","Option hi nahi hai gussa rehne ka! 🥺","Sach me bohot sorry bol raha hu!"];
+  function placeNoButtonRandomly(e){
+    if (e){ e.preventDefault(); e.stopPropagation(); }
+    const containerRect = runawayContainer.getBoundingClientRect();
+    const btnRect = noBtn.getBoundingClientRect();
+    const padding = 12;
+    const maxX = containerRect.width - btnRect.width - padding;
+    const maxY = containerRect.height - btnRect.height - padding;
+    const randomX = Math.max(padding, Math.random()*maxX);
+    const randomY = Math.max(padding, Math.random()*maxY);
+    noBtn.style.left = randomX+'px'; noBtn.style.top = randomY+'px';
+    runawayToast.innerText = evasions[Math.floor(Math.random()*evasions.length)];
+  }
+  noBtn.style.right = "16px";
+  noBtn.style.bottom = "16px";
+  noBtn.addEventListener('mouseenter', placeNoButtonRandomly);
+  noBtn.addEventListener('touchstart', placeNoButtonRandomly, {passive:false});
+  noBtn.addEventListener('pointerdown', placeNoButtonRandomly);
+  noBtn.addEventListener('click', placeNoButtonRandomly);
+
+  /* 7. Yes button */
+  const yesBtn = document.getElementById('yes-btn');
+  const celebrationSection = document.getElementById('celebration-section');
+  const revealDateBtn = document.getElementById('reveal-date-btn');
+  const datePickerSection = document.getElementById('date-picker-section');
+  yesBtn.addEventListener('click', ()=>{
+    confetti({ particleCount:50, spread:60, origin:{y:0.6}, colors:['#e11d48','#be123c','#fda4af','#ffffff'] });
+    celebrationSection.classList.remove('hidden');
+    celebrationSection.scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+  revealDateBtn.addEventListener('click', ()=>{
+    datePickerSection.classList.remove('hidden');
+    datePickerSection.scrollIntoView({ behavior:'smooth' });
+  });
+
+  /* 8. Calendar + time */
+  const daysGrid = document.getElementById('calendar-days-grid');
+  const calendarMonthName = document.getElementById('calendar-month-name');
+  const dateSummaryText = document.getElementById('date-summary-text');
+  const confirmDateBtn = document.getElementById('confirm-date-btn');
+  const finalHugSection = document.getElementById('final-hug-section');
+  const whatsappTriggerBtn = document.getElementById('whatsapp-trigger-btn');
+  const customTimeInput = document.getElementById('custom-time-input');
+
+  const currentDate = new Date();
+  const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
+  const currentYear = currentDate.getFullYear();
+  calendarMonthName.innerText = currentMonth + ' ' + currentYear;
+
+  let selectedDate = currentDate.getDate() + ' ' + currentMonth + ' ' + currentYear;
+  let selectedTime = "9:00 PM (Long Drive & Ice Cream)";
+
+  const totalDays = new Date(currentYear, currentDate.getMonth()+1, 0).getDate();
+  const firstDayIndex = new Date(currentYear, currentDate.getMonth(), 1).getDay();
+
+  for (let i=0;i<firstDayIndex;i++){ const e=document.createElement('div'); e.className='py-1.5'; daysGrid.appendChild(e); }
+
+  for (let day=1; day<=totalDays; day++){
+    const dayBtn = document.createElement('button');
+    dayBtn.type = 'button';
+    dayBtn.className = 'day-btn py-2 rounded-lg text-slate-700 hover:bg-rose-100 transition-colors flex items-center justify-center text-sm';
+    dayBtn.innerText = day;
+    if (day === currentDate.getDate()) dayBtn.classList.add('bg-petal','text-white','font-bold');
+    dayBtn.addEventListener('click', ()=>{
+      document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('bg-petal','text-white','font-bold'));
+      dayBtn.classList.add('bg-petal','text-white','font-bold');
+      selectedDate = day + ' ' + currentMonth + ' ' + currentYear;
+      updateSummary();
+    });
+    daysGrid.appendChild(dayBtn);
+  }
+
+  const timeButtons = document.querySelectorAll('.time-slot-btn');
+  timeButtons.forEach(btn=>{
+    if (btn.getAttribute('data-time').includes('9:00 PM')){
+      btn.classList.add('border-petal','bg-rose-50');
+      btn.querySelector('svg')?.classList.remove('opacity-0');
+    }
+    btn.addEventListener('click', ()=>{
+      customTimeInput.value = "";
+      timeButtons.forEach(b=>{ b.classList.remove('border-petal','bg-rose-50'); b.querySelector('svg')?.classList.add('opacity-0'); });
+      btn.classList.add('border-petal','bg-rose-50');
+      btn.querySelector('svg')?.classList.remove('opacity-0');
+      selectedTime = btn.getAttribute('data-time');
+      updateSummary();
+    });
+  });
+
+  customTimeInput.addEventListener('input', (e)=>{
+    if (e.target.value){
+      timeButtons.forEach(b=>{ b.classList.remove('border-petal','bg-rose-50'); b.querySelector('svg')?.classList.add('opacity-0'); });
+      selectedTime = e.target.value;
+      updateSummary();
+    }
+  });
+
+  function updateSummary(){
+    dateSummaryText.innerHTML = 'Date: <span class="text-petal font-bold">'+selectedDate+'</span> at <span class="text-petal font-bold">'+selectedTime+'</span> ❤️';
+  }
+  updateSummary();
+
+  confirmDateBtn.addEventListener('click', ()=>{
+    confetti({ particleCount:40, spread:50, origin:{y:0.75} });
+    const waPhoneNumber = "9554022084";
+    const rawMessage = "Please unblock kar lo na, I am missing you so much Radhika... please I want to hug you so tightly \ud83e\udd42\u2764\ufe0f \n\nI'm so sorry Radhika, sach me bohot sorry.\n\nHamari date fix ho gayi hai: "+selectedDate+" at "+selectedTime+"! Ab please jaldi aa jao.";
+    whatsappTriggerBtn.href = "https://api.whatsapp.com/send?phone="+waPhoneNumber+"&text="+encodeURIComponent(rawMessage);
+    finalHugSection.classList.remove('hidden');
+    finalHugSection.scrollIntoView({ behavior:'smooth' });
+  });
+</script>
+</body>
+</html>
